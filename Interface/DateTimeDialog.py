@@ -5,6 +5,7 @@ from datetime import date
 from datetime import datetime
 import json
 import os
+from pathlib import Path
 
 
 class DateTimeDialog(QtWidgets.QDialog):
@@ -25,7 +26,10 @@ class DateTimeDialog(QtWidgets.QDialog):
 
 class DateTimeLayout(QtWidgets.QGridLayout):
     def __init__(self, parent=None, scan_window=None):
-        self.OPTIONS_FILE = "SavedOptions/options.json"
+        self.OPTIONS_FOLDER = Path(os.path.join(os.environ["USERPROFILE"],
+                                                "Documents\\Dantem\\Options"))
+        self.OPTIONS_FILE = Path(os.path.join(self.OPTIONS_FOLDER,
+                                              "saved_options.json"))
         self.parent = parent
         self.scan_window = scan_window
         super(DateTimeLayout, self).__init__()
@@ -121,9 +125,17 @@ class DateTimeLayout(QtWidgets.QGridLayout):
         if self.scan_window.dates:
             self.dates_list.clear()
             self.scan_window.dates.clear()
+            
+            
+    def check_saved_file_path(self):
+        if not os.path.exists(self.OPTIONS_FILE):
+            self.OPTIONS_FOLDER.mkdir(parents=True)
+            with open(self.OPTIONS_FILE, "w") as f:
+                f.write("{}")
 
-
+                
     def save_dates_to_file(self):
+        self.check_saved_file_path()
         dates_dict = {}
         dates = self.scan_window.dates
         date_index = 0
@@ -138,9 +150,7 @@ class DateTimeLayout(QtWidgets.QGridLayout):
 
     def load_dates_from_file(self):
         self.del_all_dates()
-        if not os.path.exists(self.OPTIONS_FILE):
-            with open(self.OPTIONS_FILE, "w") as f:
-                f.write("{}")
+        self.check_saved_file_path()
         with open(self.OPTIONS_FILE, "r") as f:
             dates_dict = json.load(f)
         for date_time in dates_dict.values():
@@ -151,7 +161,6 @@ class DateTimeLayout(QtWidgets.QGridLayout):
                     datetime.strptime(d, "%d.%m.%Y %H:%M"))
             self.scan_window.dates.append(parsed_date_pair)
             self.dates_list.append(date_time)
-
 
 
     def save_dates(self):
