@@ -68,6 +68,10 @@ class StartScanLayout(QtWidgets.QGridLayout):
 
     def start_scan_button_clicked(self):
         interval = self.time_interval_setting.value()
+        accept_shifts = self.auto_accept_setting.isChecked()
+        self.scan_window.accept = accept_shifts
+        self.scan_window.layout.status_updates.append(
+            f"Automaticky přijímat inventury  -  {accept_shifts}")
         self.scan_window.layout.start_scan(interval=interval)
         self.close_parent()
 
