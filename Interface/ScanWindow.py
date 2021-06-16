@@ -6,6 +6,7 @@ from StartScanDialog import StartScanDialog
 
 from Scanner.connect import dantem_login
 from Scanner.connect import scan_and_accept
+from Scanner.connect import scan_and_report
 import pyautogui as pag
 
 from threading import Timer
@@ -88,7 +89,7 @@ class ScanWindow(QtWidgets.QMainWindow):
         self._session = None
         self._dates = []
         self.dates_string = ""
-
+        self.accept = True
         self.parent = parent
 
         self.layout = ScanLayout(parent=self)
@@ -180,18 +181,6 @@ class ScanLayout(QtWidgets.QGridLayout, QtCore.QObject):
             self.datetime_options_clicked)
         self.addWidget(set_datetime_options_button, 3, 1, 1, 4)
 
-        # save_settings_button = QtWidgets.QPushButton("Uložit nastavení")
-        # save_settings_button.setStyleSheet("background-color: lightyellow")
-        # save_settings_button.setFont(font_2)
-        # save_settings_button.setFixedHeight(35)
-        # self.addWidget(save_settings_button, 4, 1, 1, 2)
-
-        # reset_settings_button = QtWidgets.QPushButton("Smazat Nastavení")
-        # reset_settings_button.setStyleSheet("background-color: lightyellow")
-        # reset_settings_button.setFont(font_2)
-        # reset_settings_button.setFixedHeight(35)
-        # self.addWidget(reset_settings_button, 4, 3, 1, 2)
-
         start_scan_button = QtWidgets.QPushButton("Zahájit scan")
         start_scan_button.setStyleSheet("background-color: lightgreen")
         start_scan_button.setFont(font_3)
@@ -257,7 +246,8 @@ class ScanLayout(QtWidgets.QGridLayout, QtCore.QObject):
         scan_dialog.exec_()
 
 
-    def start_scan(self, interval, accept=True):
+    def start_scan(self, interval):
+        accept = self.parent.accept
         dates = self.parent.dates
         start_date = dates[0][0].strftime("%d.%m.%Y")
         end_date = dates[-1][1].strftime("%d.%m.%Y")
@@ -265,9 +255,11 @@ class ScanLayout(QtWidgets.QGridLayout, QtCore.QObject):
         session = self.parent.session
         dates = self.parent.dates
         timer.interval = interval
+        timer.args = [session, start_date, end_date, dates]
         if accept:
             timer.function = scan_and_accept
-            timer.args = [session, start_date, end_date, dates]
+        elif not accept:
+            timer.function = scan_and_report
         timer.start()
 
 
