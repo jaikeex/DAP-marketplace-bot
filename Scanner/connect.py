@@ -35,6 +35,28 @@ def scan_and_accept(session: requests.Session,
             else:
                 return f"{now}  -  Nová nabídka neodpovídající " \
                        f"časovým možnostem: {shift_to_string(shift)}"
+            
+
+def scan_and_report(session: requests.Session,
+                    from_date: str,
+                    to_date: str,
+                    dates: list):
+    now = datetime.datetime.today().strftime('%H:%M:%S')
+    scan_response = scan_market(session=session,
+                                from_date=from_date,
+                                to_date=to_date)
+    if is_empty(scan_response):
+        return f"{now}  -  Žádné nové nabídky"
+        pass
+    else:
+        shifts = parse_market(scan_response)
+        for shift in shifts:
+            if is_valid_offer(shift, dates):
+                return f"{now}  -  Nová zajímavá nabídka! - " \
+                       f"{shift_to_string(shift)}"
+            else:
+                return f"{now}  -  Nová nabídka neodpovídající " \
+                       f"časovým možnostem: {shift_to_string(shift)}"
 
 
 def scan_market(session: requests.Session,
