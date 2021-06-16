@@ -4,7 +4,7 @@ from PyQt5 import QtGui
 from datetime import date
 from datetime import datetime
 import json
-
+import os
 
 
 class DateTimeDialog(QtWidgets.QDialog):
@@ -138,6 +138,9 @@ class DateTimeLayout(QtWidgets.QGridLayout):
 
     def load_dates_from_file(self):
         self.del_all_dates()
+        if not os.path.exists(self.OPTIONS_FILE):
+            with open(self.OPTIONS_FILE, "w") as f:
+                f.write("{}")
         with open(self.OPTIONS_FILE, "r") as f:
             dates_dict = json.load(f)
         for date_time in dates_dict.values():
@@ -148,6 +151,7 @@ class DateTimeLayout(QtWidgets.QGridLayout):
                     datetime.strptime(d, "%d.%m.%Y %H:%M"))
             self.scan_window.dates.append(parsed_date_pair)
             self.dates_list.append(date_time)
+
 
 
     def save_dates(self):
