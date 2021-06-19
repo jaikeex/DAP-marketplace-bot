@@ -18,7 +18,8 @@ def dantem_login(username: str, password: str) -> requests.Session:
 def scan_and_accept(session: requests.Session,
                     from_date: str,
                     to_date: str,
-                    dates: list):
+                    dates: list,
+                    accept: bool):
     now = datetime.datetime.today().strftime('%H:%M:%S')
     scan_response = scan_market(session=session,
                                 from_date=from_date,
@@ -30,7 +31,8 @@ def scan_and_accept(session: requests.Session,
         shifts = parse_market(scan_response)
         for shift in shifts:
             if is_valid_offer(shift, dates):
-                accept_offer(session, shift)
+                if accept:
+                    accept_offer(session, shift)
                 return f"{now}  -  Nabídka přijata! - {shift_to_string(shift)}"
             else:
                 return f"{now}  -  Nová nabídka neodpovídající " \
