@@ -8,6 +8,7 @@ from Scanner.connect import dantem_login
 from Scanner.connect import scan_and_accept
 from Scanner.connect import scan_and_report
 import pyautogui as pag
+import requests
 
 from threading import Timer
 from threading import Thread
@@ -115,7 +116,7 @@ class ScanWindow(QtWidgets.QMainWindow):
 
 
     @session.setter
-    def session(self, value):
+    def session(self, value: requests.session):
         self._session = value
         self.session_started.emit(value)
 
@@ -126,7 +127,7 @@ class ScanWindow(QtWidgets.QMainWindow):
 
 
     @dates.setter
-    def dates(self, value):
+    def dates(self, value: list):
         self._dates = value
 
 
@@ -202,7 +203,7 @@ class ScanLayout(QtWidgets.QGridLayout, QtCore.QObject):
         self.addWidget(self.status_updates, 6, 1, 3, 4)
 
 
-    def post_session_info(self, value):
+    def post_session_info(self, value: requests.Session):
         check_text = "Moje osobní karta"
         login_succes = "PŘIHLÁŠENÍ BYLO NEÚSPĚŠNÉ, ZKUS TO ZNOVU"
         if check_text in value.get("https://dap.dantem.net/employees/").text:
@@ -218,7 +219,7 @@ class ScanLayout(QtWidgets.QGridLayout, QtCore.QObject):
         self.status_updates.append(post_text)
 
 
-    def username_display(self, value):
+    def username_display(self, value: str):
         self.logged_username.setText(value)
 
 
@@ -246,7 +247,7 @@ class ScanLayout(QtWidgets.QGridLayout, QtCore.QObject):
         scan_dialog.exec_()
 
 
-    def start_scan(self, interval):
+    def start_scan(self, interval: int):
         accept = self.parent.accept
         dates = self.parent.dates
         start_date = dates[0][0].strftime("%d.%m.%Y")
