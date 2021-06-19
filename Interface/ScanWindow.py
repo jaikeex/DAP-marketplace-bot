@@ -256,12 +256,10 @@ class ScanLayout(QtWidgets.QGridLayout, QtCore.QObject):
         session = self.parent.session
         dates = self.parent.dates
         timer.interval = interval
-        timer.args = [session, start_date, end_date, dates]
-        if accept:
-            timer.function = scan_and_accept
-        elif not accept:
-            timer.function = scan_and_report
+        timer.args = [session, start_date, end_date, dates, accept]
+        timer.function = scan_and_accept
         timer.start()
+
 
 
     def stop_scan(self):
