@@ -4,7 +4,7 @@ import PyQt5.QtGui as QtGui
 
 
 class StartScanDialog(QtWidgets.QDialog):
-    def __init__(self, parent=None, *args, **kwargs):
+    def __init__(self, parent, *args, **kwargs):
         super(StartScanDialog, self).__init__(*args, **kwargs)
 
         self.parent = parent
@@ -20,7 +20,7 @@ class StartScanDialog(QtWidgets.QDialog):
 
 
 class StartScanLayout(QtWidgets.QGridLayout):
-    def __init__(self, parent=None, scan_window=None):
+    def __init__(self, parent, scan_window):
         super(StartScanLayout, self).__init__()
         self.parent = parent
         self.scan_window = scan_window
@@ -41,7 +41,6 @@ class StartScanLayout(QtWidgets.QGridLayout):
         self.time_interval_setting.setMinimumHeight(25)
         self.addWidget(self.time_interval_setting, 1, 4, 1, 1)
 
-        # TODO: make this work
         self.auto_accept_label = QtWidgets.QLabel(
             "Automaticky přijímat inventury?")
         self.addWidget(self.auto_accept_label, 2, 1, 1, 3,
