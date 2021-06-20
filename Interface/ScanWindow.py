@@ -35,7 +35,7 @@ class LoginWindow(QtWidgets.QDialog):
 
 
 class LoginLayout(QtWidgets.QGridLayout):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         self.parent = parent
         super(LoginLayout, self).__init__()
         self.setSpacing(10)
@@ -78,7 +78,7 @@ class ScanWindow(QtWidgets.QMainWindow):
     username_changed = QtCore.pyqtSignal(object)
     session_started = QtCore.pyqtSignal(object)
 
-    def __init__(self, parent=None, *args, **kwargs):
+    def __init__(self, parent, *args, **kwargs):
         super(ScanWindow, self).__init__(*args, **kwargs)
         self.width = 500
         self.height = 500
@@ -143,7 +143,7 @@ class ScanWindow(QtWidgets.QMainWindow):
 
 
 class ScanLayout(QtWidgets.QGridLayout, QtCore.QObject):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         self.parent = parent
         super(ScanLayout, self).__init__()
         self.setSpacing(15)
