@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 class DateTimeDialog(QtWidgets.QDialog):
-    def __init__(self, parent=None, *args, **kwargs):
+    def __init__(self, parent, *args, **kwargs):
         super(DateTimeDialog, self).__init__(*args, **kwargs)
 
         self.parent = parent
@@ -25,7 +25,7 @@ class DateTimeDialog(QtWidgets.QDialog):
 
 
 class DateTimeLayout(QtWidgets.QGridLayout):
-    def __init__(self, parent=None, scan_window=None):
+    def __init__(self, parent, scan_window):
         self.OPTIONS_FOLDER = Path(os.path.join(os.environ["USERPROFILE"],
                                                 "Documents\\Dantem\\Options"))
         self.OPTIONS_FILE = Path(os.path.join(self.OPTIONS_FOLDER,
@@ -184,15 +184,15 @@ class DateTimeLayout(QtWidgets.QGridLayout):
             dates_string += "\n"
         return dates_string
 
-
-    @staticmethod
-    def date_input_error(message):
-        date_error_dlg = DateErrorDialog(message=message)
+    
+    def date_input_error(self, message):
+        date_error_dlg = DateErrorDialog(parent=self.parent, message=message)
         date_error_dlg.exec_()
 
 
+
 class DateErrorDialog(QtWidgets.QDialog):
-    def __init__(self, parent=None, message="", *args, **kwargs):
+    def __init__(self, parent, message, *args, **kwargs):
         super(DateErrorDialog, self).__init__(*args, **kwargs)
 
         self.parent = parent
