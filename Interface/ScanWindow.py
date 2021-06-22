@@ -250,11 +250,12 @@ class ScanLayout(QtWidgets.QGridLayout, QtCore.QObject):
     def start_scan(self, interval: int):
         accept = self.parent.accept
         dates = self.parent.dates
+        session = self.parent.session
+        
         start_date = dates[0][0].strftime("%d.%m.%Y")
         end_date = dates[-1][1].strftime("%d.%m.%Y")
+        
         timer = self.parent.timer
-        session = self.parent.session
-        dates = self.parent.dates
         timer.interval = interval
         timer.args = [session, start_date, end_date, dates, accept]
         timer.function = scan_and_accept
