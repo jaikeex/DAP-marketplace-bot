@@ -1,7 +1,9 @@
 import requests
-from bs4 import BeautifulSoup
 import datetime
+from bs4 import BeautifulSoup
 
+URL_LOGIN = "https://dap.dantem.net/cs/auth/login"
+URL_MARKET = "https://moznosti.dantem.net/cs/options/market/"
 
 def dantem_login(username: str, password: str) -> requests.Session:
     """
@@ -11,13 +13,12 @@ def dantem_login(username: str, password: str) -> requests.Session:
     :return: session to use for scanning the marketplace
     """
     session = requests.Session()
-    url = "https://dap.dantem.net/auth/login/"
     payload = {"username": username,
                "password": password,
                "send":     "Přihlásit se",
                "_do":      "signInForm-submit"}
 
-    session.post(url, data=payload)
+    session.post(URL_LOGIN, data=payload)
     return session
 
 
@@ -25,7 +26,7 @@ def scan_and_accept(session: requests.Session,
                     from_date: str,
                     to_date: str,
                     dates: list,
-                    accept: bool): -> str:
+                    accept: bool) -> str:
     """
     Function encompassing the entire scan process.
     Scans the market for new shifts and then either accepts or reports it
@@ -50,16 +51,20 @@ def scan_and_accept(session: requests.Session,
             if is_valid_offer(shift, dates):
                 if accept:
                     accept_offer(session, shift)
-                return f"{now}  -  Nabídka přijata! - {shift_to_string(shift)}"
+                    return f"{now}  -  Nabídka přijata! - " \
+                           f"{shift_to_string(shift)}"
+                else:
+                    return f"{now}  -  Nová zajímavá nabídka! - " \
+                           f"{shift_to_string(shift)}"
             else:
                 return f"{now}  -  Nová nabídka neodpovídající " \
                        f"časovým možnostem: {shift_to_string(shift)}"
-            
+
 
 def scan_and_report(session: requests.Session,
                     from_date: str,
                     to_date: str,
-                    dates: list) -> str:
+                    dates: list):
     """
     Not used for now.
     """
@@ -100,9 +105,7 @@ def scan_market(session: requests.Session,
                    "_do":           "market-filterForm-submit"
                    }
 
-    response = session.post("https://moznosti.dantem.net/options/market/",
-                            data=market_form)
-    response.close()
+    response = session.post(URL_MARKET, data=market_form)
     return response.text
 
 
@@ -130,7 +133,7 @@ def parse_market(response: requests.models.Response.text) -> list:
 
     dates_h3 = soup.findAll("h3")
     nr_offers = len(dates_h3)
-    inv_dict = []
+    inv_list = []
 
     for i in range(nr_offers):
         date_str = dates_h3[i].text.strip()
@@ -139,7 +142,7 @@ def parse_market(response: requests.models.Response.text) -> list:
         time_str = time_range.split("-")[0].strip()
         date_time_str = date_str + " " + time_str
 
-        # Ve verzi pro VI: place_index je time_div +2
+        # Ve verzi pro VI: place_index je time_div +2 a link index +3
         place_index = divs.index(time_div) + 1
         place = divs[place_index].text.split("\n")[2].strip()[:-1]
 
@@ -147,9 +150,9 @@ def parse_market(response: requests.models.Response.text) -> list:
         link = divs[link_index].findAll("a")[0].attrs["href"]
 
         shift = {"datetime": date_time_str, "place": place, "link": link}
-        inv_dict.append(shift)
+        inv_list.append(shift)
 
-    return inv_dict
+    return inv_list
 
 
 def get_datetime(shift: dict) -> datetime.datetime:
@@ -202,7 +205,9 @@ def accept_offer(session: requests.Session, shift: dict) -> None:
     :return: None
     """
     link = shift["link"]
-    session.post(link)
+    link_url = link.split("&")[0]
+    payload = {"_do": "market-accept"}
+    session.post(link_url, data=payload)
 
 
 def shift_to_string(shift: dict) -> str:
@@ -216,5 +221,3 @@ def shift_to_string(shift: dict) -> str:
     shift_string += ",  "
     shift_string += shift["place"]
     return shift_string
-
-
