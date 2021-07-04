@@ -1,6 +1,8 @@
 import PyQt5.QtWidgets as QtWidgets
 import PyQt5.QtCore as QtCore
 import PyQt5.QtGui as QtGui
+import requests
+
 from DateTimeDialog import DateTimeDialog
 from StartScanDialog import StartScanDialog
 
@@ -8,7 +10,6 @@ from Scanner.connect import dantem_login
 from Scanner.connect import scan_and_accept
 from Scanner.connect import scan_and_report
 import pyautogui as pag
-import requests
 
 from threading import Timer
 from threading import Thread
@@ -16,6 +17,10 @@ import sys
 
 
 class LoginWindow(QtWidgets.QDialog):
+    """
+    First window of the application. Asks for login details and creates
+    a session based on those details.
+    """
     def __init__(self, *args, **kwargs):
         super(LoginWindow, self).__init__(*args, **kwargs)
         self.width = 250
@@ -75,6 +80,10 @@ class LoginLayout(QtWidgets.QGridLayout):
 
 
 class ScanWindow(QtWidgets.QMainWindow):
+    """
+    Main window of the application. Provides access to all main functions
+    as well as displaying status updates.
+    """
     username_changed = QtCore.pyqtSignal(object)
     session_started = QtCore.pyqtSignal(object)
 
@@ -203,19 +212,26 @@ class ScanLayout(QtWidgets.QGridLayout, QtCore.QObject):
         self.addWidget(self.status_updates, 6, 1, 3, 4)
 
 
-    def post_session_info(self, value: requests.Session):
+    def post_session_info(self, session: requests.Session) -> None:
+        """
+        Posts headers and cookies of the session after login to status updates.
+        :param session:
+        :return: None
+        """
         check_text = "Moje osobní karta"
         login_succes = "PŘIHLÁŠENÍ BYLO NEÚSPĚŠNÉ, ZKUS TO ZNOVU"
-        if check_text in value.get("https://dap.dantem.net/employees/").text:
+        if check_text in session.get("https://dap.dantem.net/employees/").text:
             login_succes = "Přihlášení proběhlo úspěšně!"
-        headers = value.headers
-        cookies = value.cookies
+        headers = session.headers
+        cookies = session.cookies
+        # TODO: self.doubleparent??
         login_window = str(self.parent.parent)
         post_text = f"**************\n"\
                     f"{login_window}\n"\
                     f"{headers}\n"\
                     f"{cookies}\n\n" \
-                    f"{login_succes}\n**************"
+                    f"{login_succes}\n" \
+                    f"**************"
         self.status_updates.append(post_text)
 
 
@@ -250,17 +266,15 @@ class ScanLayout(QtWidgets.QGridLayout, QtCore.QObject):
     def start_scan(self, interval: int):
         accept = self.parent.accept
         dates = self.parent.dates
-        session = self.parent.session
-        
         start_date = dates[0][0].strftime("%d.%m.%Y")
         end_date = dates[-1][1].strftime("%d.%m.%Y")
-        
         timer = self.parent.timer
+        session = self.parent.session
+        dates = self.parent.dates
         timer.interval = interval
         timer.args = [session, start_date, end_date, dates, accept]
         timer.function = scan_and_accept
         timer.start()
-
 
 
     def stop_scan(self):
